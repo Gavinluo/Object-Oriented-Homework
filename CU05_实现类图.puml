@@ -1,0 +1,37 @@
+@startuml
+title UC05 取消预约 用例实现类图
+
+class MyReservationPage <<boundary>> {
+  +showReservationList(list : List<Reservation>)
+  +showMessage(msg : String)
+  +cancelReservation(reservationId : String)
+}
+
+class CancelReservationController <<control>> {
+  +cancelReservation(userId : String, reservationId : String)
+}
+
+class Reservation <<entity>> {
+  -reservationId : String
+  -userId : String
+  -roomId : String
+  -startTime : DateTime
+  -endTime : DateTime
+  -status : String
+}
+
+class ReservationService {
+  +getReservation(reservationId : String) : Reservation
+  +cancelReservation(reservation : Reservation) : Boolean
+}
+
+class NotificationService {
+  +sendReservationCancelled(res : Reservation)
+}
+
+MyReservationPage --> CancelReservationController
+CancelReservationController --> ReservationService
+CancelReservationController --> NotificationService
+ReservationService --> Reservation
+
+@enduml

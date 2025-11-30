@@ -1,0 +1,49 @@
+@startuml
+title UC04 创建预约 时序图
+
+actor UserActor as U
+boundary ReservationPage as B
+control CreateReservationController as C
+participant BlacklistService as BL
+participant ReservationRule as RR
+participant RoomService as RS
+participant ReservationService as RES
+participant NotificationService as NS
+
+U -> B: 选择房间、时间段\n填写用途并提交
+B -> C: createReservation(userId, roomId, date, start, end, purpose)
+
+C -> BL: isInBlacklist(userId)
+BL --> C: true/false
+
+alt 用户在黑名单
+  C --> B: showMessage("您暂时无法预约")
+  B --> U: 显示提示
+else 用户不在黑名单
+  C -> RR: checkLimit(userId, date, start, end)
+  RR --> C: result
+
+  alt 超出预约限制
+    C --> B: showMessage("已达到预约上限")
+    B --> U: 显示提示
+  else 未超出限制
+    C -> RS: isTimeSlotFree(roomId, start, end)
+    RS --> C: true/false
+
+    alt 时间段已被占用
+      C --> B: showMessage("时间段已被预约")
+      B --> U: 显示提示
+    else 时间段可用
+      C -> RES: createReservation(reservation)
+      RES --> C: 保存后的 Reservation
+
+      C -> NS: sendReservationCreated(reservation)
+      NS --> C: 通知发送结果(可忽略)
+
+      C --> B: showReservationDetail(reservation)
+      B --> U: 显示“预约成功”页面
+    end
+  end
+end
+
+@enduml

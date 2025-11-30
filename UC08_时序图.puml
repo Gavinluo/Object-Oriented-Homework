@@ -1,0 +1,38 @@
+@startuml
+title UC08 维护自习室/讨论室信息（下线房间）时序图
+
+actor Admin as A
+boundary RoomManagePage as B
+control RoomManageController as C
+participant RoomService as RS
+participant ReservationService as RES
+
+A -> B: 在房间列表选择房间\n点击“下线”
+B -> C: offlineRoom(roomId)
+
+C -> RES: hasFutureReservation(roomId)
+RES --> C: true/false
+
+alt 存在未来预约
+  C --> B: showMessage("存在未来预约，是否下线并取消?")
+  B --> A: 提示确认
+
+  alt 管理员确认下线
+    B -> C: confirmOffline(roomId)
+    C -> RES: cancelFutureReservations(roomId)
+    C -> RS: setRoomOffline(roomId)
+    RS --> C: true/false
+    C --> B: showMessage("房间已下线，相关预约已取消")
+    B --> A: 显示结果
+  else 取消下线
+    B --> A: 显示“已取消下线操作”
+  end
+
+else 不存在未来预约
+  C -> RS: setRoomOffline(roomId)
+  RS --> C: true/false
+  C --> B: showMessage("房间已下线")
+  B --> A: 显示结果
+end
+
+@enduml

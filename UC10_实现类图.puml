@@ -1,0 +1,28 @@
+@startuml
+title UC10 查看预约统计报表 时序图
+
+actor Admin as A
+boundary ReportPage as B
+control ReportController as C
+participant ReportService as RS
+participant ReservationService as RES
+participant RoomService as RMS
+
+A -> B: 选择时间范围、校区、房间类型\n点击“生成报表”
+B -> C: queryReport(criteria)
+
+C -> RS: generateReport(criteria)
+
+RS -> RES: queryReservations(criteria)
+RES --> RS: reservations
+
+RS -> RMS: queryRooms(criteria)
+RMS --> RS: rooms
+
+RS -> RS: 统计计算\n(使用率、违约率、平均时长等)
+RS --> C: ReportResult
+
+C --> B: showReport(result)
+B --> A: 展示统计报表
+
+@enduml

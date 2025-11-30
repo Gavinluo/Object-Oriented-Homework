@@ -1,0 +1,41 @@
+@startuml
+title UC05 取消预约 时序图
+
+actor UserActor as U
+boundary MyReservationPage as B
+control CancelReservationController as C
+participant ReservationService as RES
+participant NotificationService as NS
+
+U -> B: 在“我的预约”中\n点击“取消预约”
+B -> C: cancelReservation(userId, reservationId)
+
+C -> RES: getReservation(reservationId)
+RES --> C: reservation
+
+alt 预约不存在或不属于该用户
+  C --> B: showMessage("无法取消该预约")
+  B --> U: 显示提示
+else 预约属于该用户
+  C -> C: 检查预约状态、距离开始时间
+
+  alt 不满足取消条件
+    C --> B: showMessage("当前状态不可取消\n或距离开始时间过近")
+    B --> U: 显示提示
+  else 满足取消条件
+    C -> RES: cancelReservation(reservation)
+    RES --> C: true/false
+
+    alt 取消成功
+      C -> NS: sendReservationCancelled(reservation)
+      NS --> C: (结果可忽略)
+      C --> B: showMessage("取消成功")
+      B --> U: 更新列表并提示
+    else 取消失败
+      C --> B: showMessage("取消失败，请稍后重试")
+      B --> U: 显示提示
+    end
+  end
+end
+
+@enduml

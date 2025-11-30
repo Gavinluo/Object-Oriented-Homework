@@ -1,0 +1,76 @@
+@startuml
+!theme plain
+title 分布式校园自习室与讨论室预约系统 - 用例图
+skinparam backgroundColor #F5F5F5
+
+' 参与者定义
+actor 学生 as student
+actor 教职工 as staff
+actor 管理员 as admin
+actor 通知服务 as notification_service
+actor 统一认证系统 as auth_system
+
+' 抽象参与者
+actor 普通用户 as common_user
+
+' 系统边界
+rectangle "自习室预约系统" {
+    ' 用例定义
+    usecase "用户登录\n(UC01)" as UC01
+    usecase "浏览自习室与讨论室列表\n(UC02)" as UC02
+    usecase "查询可预约时间段\n(UC03)" as UC03
+    usecase "创建预约\n(UC04)" as UC04
+    usecase "取消预约\n(UC05)" as UC05
+    usecase "查看个人预约记录\n(UC06)" as UC06
+    usecase "签到/签退\n(UC07)" as UC07
+    usecase "维护自习室/讨论室信息\n(UC08)" as UC08
+    usecase "配置预约规则\n(UC09)" as UC09
+    usecase "查看预约统计报表\n(UC10)" as UC10
+    usecase "管理违约与黑名单\n(UC11)" as UC11
+    usecase "发送预约通知\n(UC12)" as UC12
+}
+
+' 参与者与用例的关系
+
+' 学生、教职工的关系（通过普通用户）
+common_user --> UC01
+common_user --> UC02
+common_user --> UC03
+common_user --> UC04
+common_user --> UC05
+common_user --> UC06
+common_user --> UC07
+
+' 管理员的关系
+admin --> UC01
+admin --> UC08
+admin --> UC09
+admin --> UC10
+admin --> UC11
+
+' 外部系统的关系
+auth_system --> UC01
+notification_service --> UC12
+
+' 参与者泛化关系
+student --|> common_user
+staff --|> common_user
+
+' 用例之间的关系
+
+' UC04 创建预约 <<include>> UC03 查询可预约时间段
+UC04 ..> UC03 : <<include>>
+
+' UC04 创建预约 <<include>> UC12 发送预约通知
+UC04 ..> UC12 : <<include>>
+
+' UC05 取消预约 <<include>> UC12 发送预约通知
+UC05 ..> UC12 : <<include>>
+
+' UC07 签到/签退 <<extend>> UC04 创建预约
+UC07 ..> UC04 : <<extend>>
+
+' UC11 管理违约与黑名单 <<extend>> UC07 签到/签退
+UC11 ..> UC07 : <<extend>>
+
+@enduml

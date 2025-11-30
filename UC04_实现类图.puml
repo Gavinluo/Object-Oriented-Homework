@@ -1,0 +1,64 @@
+@startuml
+title UC04 创建预约 用例实现类图
+
+class ReservationPage <<boundary>> {
+  +selectedRoomId : String
+  +selectedDate : Date
+  +startTime : DateTime
+  +endTime : DateTime
+  +purpose : String
+  +showMessage(msg : String)
+  +showReservationDetail(r : Reservation)
+  +submitReservation()
+}
+
+class CreateReservationController <<control>> {
+  +createReservation(userId : String, roomId : String,\n date : Date, start : DateTime, end : DateTime, purpose : String)
+}
+
+class User <<entity>> {
+  -userId : String
+  -name : String
+}
+
+class ReservationRule {
+  +checkLimit(userId : String, date : Date,\n start : DateTime, end : DateTime) : Boolean
+}
+
+class BlacklistService {
+  +isInBlacklist(userId : String) : Boolean
+}
+
+class RoomService {
+  +isTimeSlotFree(roomId : String, start : DateTime, end : DateTime) : Boolean
+}
+
+class Reservation <<entity>> {
+  -reservationId : String
+  -userId : String
+  -roomId : String
+  -startTime : DateTime
+  -endTime : DateTime
+  -purpose : String
+  -status : String
+}
+
+class ReservationService {
+  +createReservation(res : Reservation) : Reservation
+}
+
+class NotificationService {
+  +sendReservationCreated(res : Reservation)
+}
+
+ReservationPage --> CreateReservationController
+CreateReservationController --> BlacklistService
+CreateReservationController --> ReservationRule
+CreateReservationController --> RoomService
+CreateReservationController --> ReservationService
+CreateReservationController --> NotificationService
+
+ReservationService --> Reservation
+CreateReservationController --> User
+
+@enduml

@@ -1,0 +1,36 @@
+@startuml
+title UC03 查询可预约时间段 时序图
+
+actor UserActor as U
+boundary TimeSlotQueryPage as B
+control TimeSlotQueryController as C
+participant RoomService as RS
+participant ReservationService as RES
+
+U -> B: 选择房间、日期\n点击“查询”
+B -> C: queryAvailableSlots(roomId, date)
+
+C -> RS: getRoom(roomId)
+RS --> C: Room
+
+alt 房间不可用(维护/下线)
+  C -> B: showMessage("该房间在所选日期不可预约")
+  B --> U: 显示提示
+else 房间可用
+  C -> RS: getBaseTimeSlots(roomId, date)
+  RS --> C: baseTimeSlots
+
+  C -> RES: getReservedSlots(roomId, date)
+  RES --> C: reservedSlots
+
+  C -> C: 计算可预约时间段\n(base - reserved)
+  alt 有可预约时间段
+    C --> B: showAvailableSlots(slots)
+    B --> U: 显示可预约时间段列表
+  else 无可预约时间段
+    C --> B: showMessage("该房间在所选日期\n无可预约时间段")
+    B --> U: 显示提示
+  end
+end
+
+@enduml

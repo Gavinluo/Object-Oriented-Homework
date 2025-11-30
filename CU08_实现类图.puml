@@ -1,0 +1,44 @@
+@startuml
+title UC08 维护自习室/讨论室信息 用例实现类图
+
+class RoomManagePage <<boundary>> {
+  +showRoomList(list : List<Room>)
+  +showMessage(msg : String)
+  +createRoom()
+  +editRoom(roomId : String)
+  +offlineRoom(roomId : String)
+}
+
+class RoomManageController <<control>> {
+  +createRoom(dto : Room)
+  +updateRoom(dto : Room)
+  +offlineRoom(roomId : String)
+}
+
+class Room <<entity>> {
+  -roomId : String
+  -name : String
+  -campus : String
+  -location : String
+  -type : String
+  -capacity : int
+  -status : String  'available/maintenance/offline
+}
+
+class RoomService {
+  +addRoom(room : Room) : Boolean
+  +updateRoom(room : Room) : Boolean
+  +setRoomOffline(roomId : String) : Boolean
+}
+
+class ReservationService {
+  +hasFutureReservation(roomId : String) : Boolean
+  +cancelFutureReservations(roomId : String)
+}
+
+RoomManagePage --> RoomManageController
+RoomManageController --> RoomService
+RoomManageController --> ReservationService
+RoomService --> Room
+
+@enduml

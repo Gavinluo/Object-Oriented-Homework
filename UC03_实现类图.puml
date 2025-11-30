@@ -1,0 +1,51 @@
+@startuml
+title UC03 查询可预约时间段 用例实现类图
+
+class TimeSlotQueryPage <<boundary>> {
+  +selectedRoomId : String
+  +selectedDate : Date
+  +showAvailableSlots(slots : List<AvailableTimeSlot>)
+  +showMessage(msg : String)
+  +search()
+}
+
+class TimeSlotQueryController <<control>> {
+  +queryAvailableSlots(roomId : String, date : Date)
+}
+
+class Room <<entity>> {
+  -roomId : String
+  -name : String
+  -status : String   'available/maintenance/offline
+}
+
+class RoomService {
+  +getRoom(roomId : String) : Room
+  +getBaseTimeSlots(roomId : String, date : Date) : List<TimeSlotTemplate>
+}
+
+class Reservation <<entity>> {
+  -reservationId : String
+  -roomId : String
+  -startTime : DateTime
+  -endTime : DateTime
+  -status : String   'reserved/cancelled/finished
+}
+
+class ReservationService {
+  +getReservedSlots(roomId : String, date : Date) : List<Reservation>
+}
+
+class AvailableTimeSlot {
+  -startTime : DateTime
+  -endTime : DateTime
+}
+
+TimeSlotQueryPage --> TimeSlotQueryController
+TimeSlotQueryController --> RoomService
+TimeSlotQueryController --> ReservationService
+
+RoomService --> Room
+ReservationService --> Reservation
+
+@enduml

@@ -1,0 +1,44 @@
+@startuml
+title UC01 用户登录 用例实现类图
+
+class LoginPage <<boundary>> {
+  +inputAccount : String
+  +inputPassword : String
+  +showMessage(msg : String)
+  +submitLogin()
+}
+
+class AuthController <<control>> {
+  +login(account : String, password : String)
+}
+
+class User <<entity>> {
+  -userId : String
+  -name : String
+  -role : String
+  -status : String  'normal/locked/disabled
+  +isLocked() : Boolean
+}
+
+class AuthService {
+  +authenticate(account : String, password : String) : User
+  +increaseFailedCount(account : String)
+  +lockUser(account : String)
+}
+
+class SSOClient {
+  +ssoAuthenticate(account : String, password : String) : Boolean
+}
+
+class SessionManager {
+  +createSession(user : User) : String
+  +invalidateSession(sessionId : String)
+}
+
+LoginPage --> AuthController
+AuthController --> AuthService
+AuthService --> SSOClient
+AuthService --> User
+AuthController --> SessionManager
+
+@enduml
