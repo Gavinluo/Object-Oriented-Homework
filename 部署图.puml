@@ -1,0 +1,23 @@
+@startuml
+title Deployment Diagram - Reservation System
+
+node "<<client workstation>>\nStudent/Teacher Device" as Client
+
+node "<<application server>>\nReservation Server" as AppServer
+
+node "<<database server>>\nReservationDB" as DBServer
+
+node "<<cache server>>\nRedis Cache" as CacheServer
+
+node "<<notification server>>\nNotification Worker" as NotifServer
+
+node "<<SSO server>>\nCampus SSO" as SSO
+
+' 连接关系，仿 PPT 上的 Campus LAN
+Client -- AppServer : <<Campus LAN>>
+AppServer -- DBServer : <<Campus LAN>>
+AppServer -- CacheServer : <<Campus LAN>>
+AppServer -- NotifServer : <<Campus LAN>>
+AppServer -- SSO : <<Campus LAN>>
+
+@enduml

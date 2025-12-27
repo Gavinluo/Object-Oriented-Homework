@@ -1,0 +1,19 @@
+@startuml
+title Deployment Specification - Reservation Server
+
+class ReservationAppHeader <<header>> { ... }
+class ReservationAppSource <<source>> { ... }
+class ReservationAppBinary <<executable>> { ... }
+class ReservationServerProcess <<process>> { ... }
+class ReservAppDeploy <<deploymentSpec>> { ... }
+
+class AppNode <<application server>> { Reservation Server }
+
+' 下面关系保持不变
+ReservationAppHeader ..> ReservationAppBinary : <<manifest>>
+ReservationAppSource ..> ReservationAppBinary : <<manifest>>
+ReservationAppBinary ..> ReservationServerProcess : <<manifest>>
+AppNode ..> ReservationServerProcess : <<deploy>>
+ReservAppDeploy ..> ReservationServerProcess : <<manifest>>
+
+@enduml

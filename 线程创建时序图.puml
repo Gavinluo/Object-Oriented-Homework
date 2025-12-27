@@ -1,0 +1,20 @@
+@startuml
+title Runtime Architecture - Create Processes and Threads
+
+participant ":ReservationServerProcess" as Server
+participant ":RequestHandlerThread" as ReqThread
+participant ":NotificationWorkerProcess" as NotifProc
+participant ":NotifySenderThread" as NotifThread
+
+activate Server
+activate NotifProc
+
+' 系统启动时创建请求处理线程
+Server -> ReqThread ++ : createThread()
+ReqThread -> Server : ready()
+
+' 系统启动时创建通知发送线程
+NotifProc -> NotifThread ++ : createThread()
+NotifThread -> NotifProc : ready()
+
+@enduml

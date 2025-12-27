@@ -1,0 +1,29 @@
+@startuml
+title Runtime Architecture - Process View (Class Diagram)
+
+' ========== Processes ==========
+class StudentClientProcess <<process>> {
+}
+
+class ReservationServerProcess <<process>> {
+}
+
+class NotificationWorkerProcess <<process>> {
+}
+
+' ========== Threads ==========
+class RequestHandlerThread <<thread>> {
+}
+
+class NotifySenderThread <<thread>> {
+}
+
+' ========== Dependencies between processes ==========
+StudentClientProcess ..> ReservationServerProcess : dependency
+ReservationServerProcess ..> NotificationWorkerProcess : dependency
+
+' ========== Composition: processes own threads ==========
+ReservationServerProcess "1" *-- "0..n" RequestHandlerThread : creates
+NotificationWorkerProcess "1" *-- "1..n" NotifySenderThread : creates
+
+@enduml
