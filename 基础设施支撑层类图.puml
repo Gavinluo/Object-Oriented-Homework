@@ -1,0 +1,31 @@
+@startuml 基础设施支撑层类图
+skinparam class {
+    BackgroundColor #f9f9f9
+    BorderColor #333
+}
+skinparam interface {
+    BackgroundColor #e6f7ff
+    BorderColor #1890ff
+}
+
+interface SSOApi {
+    + auth(account:String, pwd:String):User
+}
+interface MessageGateway {
+    + sendSms(userId:String, content:String):boolean
+}
+interface Repository<T> {
+    + save(entity:T):T
+}
+
+class SSOClient {
+    + auth(account:String, pwd:String):User
+}
+class SmsGatewayImpl {
+    + sendSms(userId:String, content:String):boolean
+}
+
+SSOApi --|> SSOClient
+MessageGateway --|> SmsGatewayImpl
+Repository --|> JpaRepositoryImpl
+@enduml

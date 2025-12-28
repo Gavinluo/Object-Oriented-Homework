@@ -1,0 +1,87 @@
+@startuml
+' 预约管理子系统
+skinparam class {
+    BackgroundColor #f9f9f9
+    BorderColor #222
+}
+skinparam interface {
+    BackgroundColor #e6f7ff
+    BorderColor #1890ff
+}
+skinparam package {
+    BackgroundColor #f0f8fb
+    BorderColor #888
+}
+
+package "预约管理子系统" {
+    ' 对外接口
+    interface ReservationOperateApi {
+        + createReservation(res: Reservation, sessionId: String): ReservationResult
+        + cancelReservation(resId: String, sessionId: String): boolean
+        + checkIn(resId: String, sessionId: String): boolean
+        + checkOut(resId: String, sessionId: String): boolean
+    }
+    interface ReservationQueryApi {
+        + getOccupiedTimeSlots(roomId: String, date: Date): List<TimeSlot>
+        + getUserReservations(userId: String, start: Date, end: Date): List<Reservation>
+        + getViolationRecords(userId: String): List<ViolationRecord>
+    }
+    
+    ' 内部核心类
+    class Reservation {
+        - resId: String
+        - userId: String
+        - roomId: String
+        - date: Date
+        - startTime: String
+        - endTime: String
+        - status: Enum ' RESERVED/CANCELED/ONGOING/COMPLETED/VIOLATED
+        - createTime: Date
+        + cancel(): void
+        + checkIn(): void
+        + checkOut(): void
+        + isViolated(): boolean
+    }
+    class ReservationRule {
+        - ruleId: String
+        - userType: Enum ' STUDENT/TEACHER
+        - dailyMaxCount: int
+        - dailyMaxDuration: int
+        - advanceMinutes: int
+        - cancelAdvanceMinutes: int
+        + checkRule(user: User, res: Reservation): boolean
+    }
+    class ReservationService {
+        ' 跨子系统依赖
+        - blacklistApi: BlacklistApi
+        - roomQueryApi: RoomQueryApi
+        - notificationApi: NotificationApi
+        + createReservation(res: Reservation): boolean
+        + checkConflict(res: Reservation): boolean
+        + countUserDailyRes(userId: String, date: Date): int
+    }
+    class CheckInService {
+        + checkIn(resId: String, userId: String): boolean
+        + checkOut(resId: String, userId: String): boolean
+        + detectViolation(res: Reservation): ViolationRecord
+    }
+    class ViolationRecord {
+        - recordId: String
+        - resId: String
+        - userId: String
+        - violationType: Enum ' NO_CHECKIN/OVERTIME
+        - violationTime: Date
+        - processStatus: Enum ' UNHANDLED/HANDLED
+    }
+}
+
+' 内部依赖关系
+ReservationOperateApi --|> ReservationService
+ReservationOperateApi --|> CheckInService
+ReservationQueryApi --|> ReservationService
+ReservationService *-- ReservationRule
+ReservationService *-- Reservation
+CheckInService *-- Reservation
+CheckInService *-- ViolationRecord
+
+@enduml

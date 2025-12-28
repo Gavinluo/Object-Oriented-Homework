@@ -1,0 +1,87 @@
+@startuml
+' 基础设施支撑层
+skinparam class {
+    BackgroundColor #f9f9f9
+    BorderColor #222
+    FontSize 10
+}
+skinparam interface {
+    BackgroundColor #e6f7ff
+    BorderColor #1890ff
+    FontSize 10
+}
+skinparam package {
+    BackgroundColor #f0f8fb
+    BorderColor #888
+    FontSize 11
+}
+
+package "基础设施支撑层" {
+    ' 对外接口
+    interface SSOApi {
+        + auth(account: String, pwd: String): User
+        + validateToken(token: String): boolean
+    }
+    
+    interface MessageGateway {
+        + sendSms(userId: String, content: String): boolean
+        + sendEmail(userId: String, content: String): boolean
+        + sendPush(userId: String, content: String): boolean
+    }
+    
+    interface Repository {
+        + save(entity: Object): Object
+        + findById(id: String): Object
+        + update(entity: Object): boolean
+        + deleteById(id: String): boolean
+        + list(condition: Object): List
+    }
+    
+    interface CacheApi {
+        + set(key: String, value: Object, expire: int): void
+        + get(key: String): Object
+        + delete(key: String): void
+        + expire(key: String, expire: int): void
+    }
+    
+    ' 内部核心类
+    class SSOClient {
+        - ssoServerUrl: String
+        - appKey: String
+        + auth(account: String, pwd: String): User
+        + validateToken(token: String): boolean
+    }
+    
+    class SmsGatewayImpl {
+        - smsApiUrl: String
+        - apiKey: String
+        + sendSms(userId: String, content: String): boolean
+    }
+    
+    class EmailGatewayImpl {
+        - smtpHost: String
+        - from: String
+        + sendEmail(userId: String, content: String): boolean
+    }
+    
+    class JpaRepositoryImpl {
+        + save(entity: Object): Object
+        + findById(id: String): Object
+    }
+    
+    class RedisCacheImpl {
+        - redisHost: String
+        - redisPort: int
+        + set(key: String, value: Object): void
+        + get(key: String): Object
+    }
+}
+
+' 依赖关系
+SSOApi --|> SSOClient
+MessageGateway --|> SmsGatewayImpl
+MessageGateway --|> EmailGatewayImpl
+Repository --|> JpaRepositoryImpl
+CacheApi --|> RedisCacheImpl
+
+@enduml

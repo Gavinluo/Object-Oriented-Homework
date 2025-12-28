@@ -1,0 +1,37 @@
+@startuml 预约管理子系统类图
+skinparam class {
+    BackgroundColor #f9f9f9
+    BorderColor #333
+}
+skinparam interface {
+    BackgroundColor #e6f7ff
+    BorderColor #1890ff
+}
+
+interface ReservationOperateApi {
+    + createReservation(res:Reservation):boolean
+    + checkIn(resId:String):boolean
+}
+interface ReservationQueryApi {
+    + getUserReservations(userId:String):List<Reservation>
+}
+
+class Reservation {
+    - resId:String
+    - userId:String
+    - status:ResStatusEnum
+    + cancel():void
+}
+class ViolationRecord {
+    - recordId:String
+    - resId:String
+}
+class ReservationService {
+    + checkConflict(res:Reservation):boolean
+}
+
+ReservationOperateApi --|> ReservationService
+ReservationQueryApi --|> ReservationService
+Reservation --> ViolationRecord
+ReservationService --> Reservation
+@enduml

@@ -1,0 +1,38 @@
+@startuml 场地资源管理子系统
+skinparam class {
+    BackgroundColor #f9f9f9
+    BorderColor #333
+}
+skinparam interface {
+    BackgroundColor #e6f7ff
+    BorderColor #1890ff
+}
+
+interface RoomManageApi {
+    + addRoom(room:Room):boolean
+    + offlineRoom(roomId:String):boolean
+}
+interface RoomQueryApi {
+    + getRoom(roomId:String):Room
+    + isRoomAvailable(roomId:String, date:Date):boolean
+}
+
+class Room {
+    - roomId:String
+    - type:RoomTypeEnum
+    - status:RoomStatusEnum
+    + getAvailableTimeSlots(date:Date):List<TimeSlot>
+}
+class TimeSlotTemplate {
+    - templateId:String
+    - roomId:String
+}
+class RoomService {
+    + addRoom(room:Room):boolean
+}
+
+RoomManageApi --|> RoomService
+RoomQueryApi --|> RoomService
+Room --> TimeSlotTemplate
+RoomService --> Room
+@enduml

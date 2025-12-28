@@ -1,0 +1,68 @@
+@startuml
+' 场地资源管理子系统
+skinparam class {
+    BackgroundColor #f9f9f9
+    BorderColor #222
+}
+skinparam interface {
+    BackgroundColor #e6f7ff
+    BorderColor #1890ff
+}
+skinparam package {
+    BackgroundColor #f0f8fb
+    BorderColor #888
+}
+
+package "场地资源管理子系统" {
+    ' 对外接口
+    interface RoomManageApi {
+        + addRoom(room: Room): boolean
+        + updateRoom(room: Room): boolean
+        + offlineRoom(roomId: String, cancelFutureRes: boolean): boolean
+    }
+    interface RoomQueryApi {
+        + getRoom(roomId: String): Room
+        + getBaseTimeSlots(roomId: String, date: Date): List<TimeSlot>
+        + isRoomAvailable(roomId: String, date: Date): boolean
+        + listRooms(campus: String, type: Enum): List<Room>
+    }
+    
+    ' 内部核心类
+    class Room {
+        - roomId: String
+        - roomCode: String
+        - campus: String
+        - type: Enum ' STUDY/DISCUSSION
+        - capacity: int
+        - status: Enum ' AVAILABLE/MAINTENANCE/OFFLINE
+        - timeSlotTemplates: List<TimeSlotTemplate>
+        + getAvailableTimeSlots(date: Date): List<TimeSlot>
+        + isAvailable(date: Date): boolean
+        + updateStatus(status: Enum): void
+    }
+    class TimeSlotTemplate {
+        - templateId: String
+        - roomId: String
+        - weekDay: int
+        - startTime: String
+        - endTime: String
+        - status: Enum ' VALID/INVALID
+        + isTimeSlotValid(date: Date, slot: TimeSlot): boolean
+    }
+    class RoomService {
+        ' 跨子系统依赖
+        - reservationQueryApi: ReservationQueryApi
+        + addRoom(room: Room): boolean
+        + checkRoomCodeUnique(roomCode: String): boolean
+        + processOfflineRoom(roomId: String): boolean
+    }
+}
+
+' 内部依赖关系
+RoomManageApi --|> RoomService
+RoomQueryApi --|> RoomService
+Room *-- TimeSlotTemplate
+RoomService *-- Room
+RoomService *-- TimeSlotTemplate
+
+@enduml

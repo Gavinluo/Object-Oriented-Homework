@@ -1,0 +1,83 @@
+@startuml
+' 通知与统计子系统
+skinparam class {
+    BackgroundColor #f9f9f9
+    BorderColor #222
+    FontSize 10
+}
+skinparam interface {
+    BackgroundColor #e6f7ff
+    BorderColor #1890ff
+    FontSize 10
+}
+skinparam package {
+    BackgroundColor #f0f8fb
+    BorderColor #888
+    FontSize 11
+}
+
+' 核心包结构
+package "通知与统计子系统" {
+    ' 对外接口
+    interface NotificationApi {
+        + sendReservationSuccessNotify(userId: String, resId: String): boolean
+        + sendCancelSuccessNotify(userId: String, resId: String): boolean
+        + sendViolationNotify(userId: String, resId: String): boolean
+        + addRetryQueue(notify: Notification): boolean
+    }
+    
+    interface ReportApi {
+        + generateReport(condition: ReportCondition): ReportResult
+        + exportReport(result: ReportResult, type: ExportType): byte[]
+        + getStatistics(condition: StatisticsCondition): Statistics
+    }
+    
+    ' 内部核心类
+    class Notification {
+        - notifyId: String
+        - userId: String
+        - resId: String
+        - notifyType: String ' 枚举值：RES_SUCCESS/CANCEL_SUCCESS/VIOLATION/REMIND
+        - content: String
+        - sendTime: Date
+        - status: String ' 枚举值：SENT/FAILED/RETRY
+        + send(): boolean
+    }
+    
+    class NotificationService {
+        ' 跨子系统依赖
+        - messageGateway: MessageGateway
+        + sendNotification(notify: Notification): boolean
+        + retryFailedNotify(notifyId: String): boolean
+    }
+    
+    class ReportResult {
+        - reportId: String
+        - startDate: Date
+        - endDate: Date
+        - campus: String
+        - roomType: String ' 枚举值：STUDY/DISCUSSION
+        - usageRate: double
+        - violationRate: double
+        - avgDuration: double
+        - detailData: List<ReportDetail>
+        + exportToExcel(): byte[]
+        + exportToPDF(): byte[]
+    }
+    
+    class ReportService {
+        ' 跨子系统依赖
+        - reservationQueryApi: ReservationQueryApi
+        - roomQueryApi: RoomQueryApi
+        + calculateUsageRate(roomId: String, start: Date, end: Date): double
+        + generateReport(condition: ReportCondition): ReportResult
+    }
+}
+
+' 依赖关系
+NotificationApi --|> NotificationService
+ReportApi --|> ReportService
+NotificationService *-- Notification
+ReportService *-- ReportResult
+
+@enduml

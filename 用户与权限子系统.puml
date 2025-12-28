@@ -1,0 +1,41 @@
+@startuml 用户与权限子系统
+skinparam class {
+    BackgroundColor #f9f9f9
+    BorderColor #333
+}
+skinparam interface {
+    BackgroundColor #e6f7ff
+    BorderColor #1890ff
+}
+
+interface AuthApi {
+    + login(account:String, password:String):LoginResult
+    + validateSession(sessionId:String):boolean
+}
+interface BlacklistApi {
+    + isUserBlacklisted(userId:String):boolean
+}
+
+class User {
+    - userId:String
+    - userType:UserTypeEnum
+    - status:UserStatusEnum
+    + getRole():Role
+}
+class Role {
+    - roleId:String
+    - permissions:List<Permission>
+}
+class AuthService {
+    + authenticate(account:String, pwd:String):User
+}
+class BlacklistService {
+    + isBlacklisted(userId:String):boolean
+}
+
+AuthApi --|> AuthService
+BlacklistApi --|> BlacklistService
+User --> Role
+AuthService --> User
+BlacklistService --> User
+@enduml

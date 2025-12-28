@@ -1,0 +1,34 @@
+@startuml 通知与统计子系统
+skinparam class {
+    BackgroundColor #f9f9f9
+    BorderColor #333
+}
+skinparam interface {
+    BackgroundColor #e6f7ff
+    BorderColor #1890ff
+}
+
+interface NotificationApi {
+    + sendReservationSuccessNotify(userId:String):boolean
+}
+interface ReportApi {
+    + generateReport():ReportResult
+}
+
+class Notification {
+    - notifyId:String
+    - userId:String
+    - status:NotifyStatusEnum
+}
+class ReportResult {
+    - usageRate:double
+    - violationRate:double
+}
+class NotificationService {
+    + sendNotification(notify:Notification):boolean
+}
+
+NotificationApi --|> NotificationService
+ReportApi --|> ReportService
+NotificationService --> Notification
+@enduml
